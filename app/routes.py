@@ -48,6 +48,7 @@ async def update_data(request: RequestBook, key: str):
             message="Data not found"
         )
 
+
 # Delete request fro delete existing data
 @router.delete("/delete/{key}")
 async def delete_data(key: str):
@@ -61,4 +62,3 @@ async def delete_data(key: str):
         return Response(status="Bad Request",
                         code="400",
                         message="Data not found").dict(exclude_none=True)
-
