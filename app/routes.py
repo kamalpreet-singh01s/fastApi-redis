@@ -10,9 +10,13 @@ router = APIRouter()
 @router.get("/{key}")
 async def get_data(key: str):
     _data = redis_db_obj.json().get(key, '$')
+    if _data:
+        message = "All data received successfully"
+    else:
+        message = "No data found"
     return Response(status="Ok",
                     code="200",
-                    message="All data fetched successfully!!",
+                    message=message,
                     result=_data)
 
 
@@ -22,7 +26,7 @@ async def create_data(request: RequestBook, key: str):
     redis_db_obj.json().set(key, '$', dict(request.parameter))
     return Response(status="Ok",
                     code="200",
-                    message="Book created successfully").dict(exclude_none=True)
+                    message="New data added successfully").dict(exclude_none=True)
 
 
 # Patch request for update existing data
@@ -34,13 +38,20 @@ async def update_data(request: RequestBook, key: str):
 
     return Response(status="Ok",
                     code="200",
-                    message="Success!! Data has been updated")
+                    message="The data has been successfully updated")
 
 
 # Delete request fro delete existing data
 @router.delete("/delete/{key}")
 async def delete_data(key: str):
-    redis_db_obj.json().delete(key, '$')
-    return Response(status="Ok",
-                    code="200",
-                    message="Success!! Data has been deleted.").dict(exclude_none=True)
+    search_key = redis_db_obj.json().get(key, '$')
+    if search_key:
+        redis_db_obj.json().delete(key, '$')
+        return Response(status="Ok",
+                        code="200",
+                        message="The data has been successfully deleted").dict(exclude_none=True)
+    else:
+        return Response(status="Bad Request",
+                        code="400",
+                        message="Data not found").dict(exclude_none=True)
+
