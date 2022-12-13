@@ -32,14 +32,21 @@ async def create_data(request: RequestBook, key: str):
 # Patch request for update existing data
 @router.patch("/update/{key}")
 async def update_data(request: RequestBook, key: str):
-    redis_db_obj.json().set(key, '$..id', request.parameter.id)
-    redis_db_obj.json().set(key, '$..title', request.parameter.title)
-    redis_db_obj.json().set(key, '$..description', request.parameter.description)
+    search_key = redis_db_obj.json().get(key, '$')
+    if search_key:
+        redis_db_obj.json().set(key, '$..id', request.parameter.id)
+        redis_db_obj.json().set(key, '$..title', request.parameter.title)
+        redis_db_obj.json().set(key, '$..description', request.parameter.description)
 
-    return Response(status="Ok",
-                    code="200",
-                    message="The data has been successfully updated")
-
+        return Response(status="Ok",
+                        code="200",
+                        message="The data has been successfully updated")
+    else:
+        return Response(
+            status="Bad Request",
+            code="400",
+            message="Data not found"
+        )
 
 # Delete request fro delete existing data
 @router.delete("/delete/{key}")
